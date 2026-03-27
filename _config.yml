@@ -3,6 +3,7 @@ description: Notes and posts
 theme: minima
 baseurl: "/blog"
 url: "https://jjzz888.github.io"
+permalink: "/:title.html"
 
 plugins:
   - jekyll-feed
