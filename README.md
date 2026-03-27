@@ -13,7 +13,7 @@ Jekyll blog for `https://jjzz888.github.io/blog`.
 layout: post
 title: "My Post Title"
 date: 2026-03-27 10:00:00 +0800
-categories: [notes]
+categories: [notes/test/...]
 ---
 
 Write your post here.
@@ -45,7 +45,7 @@ Notes and best practices:
 layout: post
 title: "My Post Title"
 date: 2026-03-27 10:00:00 +0800
-categories: [notes]
+categories: [notes/test/...]
 permalink: /notes/my-post-custom.html
 ---
 ```

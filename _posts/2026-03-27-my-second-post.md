@@ -2,7 +2,7 @@
 layout: post
 title: "My Second Post"
 date: 2026-03-27 12:00:00 +0800
-permalink: /my-second-post.html
+categories: [test]
 ---
 
 This is my second blog post.
