@@ -9,7 +9,6 @@ categories: [llm, machine-learning]
 
 *Version 1.0 — May 2026*
 
----
 
 ## Executive Summary
 
@@ -19,7 +18,6 @@ The report has three main goals. First, it provides defensible default ranges fo
 
 A pre-training configuration checklist appears in Section 2 and is the recommended starting point for any new training run.
 
----
 
 ## 1. Scope and Conventions
 
@@ -35,7 +33,6 @@ Throughout, the report uses η for learning rate, B for batch size, λ for weigh
 
 The report deliberately does not cover full RLHF with PPO in depth, classical reinforcement learning algorithms, or pre-training from scratch at frontier scale. Where GRPO is discussed, it is in the context of how it relates to DPO in modern alignment pipelines, not as a comprehensive RL guide.
 
----
 
 ## 2. Pre-Training Configuration Checklist
 
@@ -63,7 +60,6 @@ Before launching any non-trivial training run, the following ten questions shoul
 
 The remaining sections expand on each of these and the surrounding theory.
 
----
 
 ## 3. General Hyperparameters
 
@@ -104,7 +100,6 @@ A max_norm of 1.0 on the global gradient norm is the conventional default. The t
 
 Longer sequences are quadratically more expensive in attention. The right length depends on the actual length distribution of the task and on whether sequence packing is used. Section 13 covers padding versus packing, the cost of truncation, and the considerations around long-context training.
 
----
 
 ## 4. Stage-Specific Parameters
 
@@ -130,7 +125,6 @@ Typical range: 0.01 to 0.5. Larger β produces more conservative updates that st
 
 **Variant-specific parameters.** SimPO introduces a margin parameter γ that imposes a minimum gap (analogous to a hinge loss). IPO introduces its own regularization coefficient. These are not interchangeable with DPO's β; their semantics differ.
 
----
 
 ## 5. Tuning Priority and General Strategy
 
@@ -148,7 +142,6 @@ For CPT, data volume and coverage often matter more than per-sample quality, sin
 
 **Validation strategy.** Run ablations at smaller scale (1.5B–3B parameters) to identify good hyperparameter ranges before committing to the full training run. Many decisions transfer across model sizes; some, especially around effective learning rate, do not — see Section 7.4.
 
----
 
 ## 6. Batch Size: Theory and Practice
 
@@ -233,7 +226,6 @@ The rule holds because doubling B halves the gradient noise, and doubling η res
 
 Start from a small batch warmup, increase to the target equivalent batch size, and scale learning rate linearly during the increase. Beyond the linear-scaling regime, expect generalization gap to appear regardless of η compensation; consider whether the additional throughput is worth the quality cost.
 
----
 
 ## 7. Learning Rate: Mechanisms and Tuning
 
@@ -294,7 +286,6 @@ Annealing on a small high-quality dataset late in training has been reported to 
 
 The single most informative log field is the learning-rate value itself. Plotting it alongside loss confirms whether warmup is ramping correctly and whether decay is on schedule.
 
----
 
 ## 8. Training Epochs
 
@@ -322,7 +313,6 @@ A subtle but important point: training duration itself does not cause overfittin
 
 DPO typically runs 1–3 epochs. The reasoning is twofold: preference data is expensive and usually small; and the chosen-versus-rejected reward margin tends to compress as training proceeds, so additional epochs produce diminishing learning signal even before classical overfitting begins.
 
----
 
 ## 9. Learning Rate Schedulers
 
@@ -372,7 +362,6 @@ A simple decision flow:
 3. Otherwise, default to **warmup + cosine decay**.
 4. Only consider **cosine with restarts** if you have evidence of problematic local minima and resources for the additional tuning of cycle length.
 
----
 
 ## 10. Steps, Warmup Ratio, and Gradient Accumulation
 
@@ -419,7 +408,6 @@ Framework conventions are not uniform:
 
 When in doubt, plot the `learning_rate` field against the step counter. If warmup is configured correctly, η will ramp linearly from 0 to η_max over the expected step range. This is more reliable than trusting the name of the step counter.
 
----
 
 ## 11. Weight Decay and AdamW
 
@@ -532,7 +520,6 @@ def get_param_groups(model, weight_decay):
 
 When using DeepSpeed with parameter groups defined this way, ZeRO-1/2/3 sharding does not affect group membership; each shard inherits the weight-decay setting of its parameter group. Specifying optimizer settings entirely through DeepSpeed config is simpler but precludes per-group weight decay; for production training, configure parameter groups in user code.
 
----
 
 ## 12. Maximum Sequence Length
 
@@ -572,7 +559,6 @@ Extending max_seq_len faces three obstacles: memory (attention is O(n²) in the 
 
 Choosing max_seq_len is a tradeoff among training efficiency, information completeness, and memory cost. The right value is determined by the actual length distribution of the data, not by the model's nominal maximum. Use packing for short-sample data; use long-context techniques for long-document data; do not pad excessively in either case.
 
----
 
 ## 13. Gradient Clipping
 
@@ -635,7 +621,6 @@ A natural question: given that Adam's adaptive normalization already bounds sing
 
 So for AdamW-trained LLMs, gradient clipping is best understood as an engineering safety boundary rather than an algorithmic necessity, but it is a safety boundary that should not be omitted.
 
----
 
 ## 14. SFT Data Mixture
 
@@ -708,7 +693,6 @@ These are starting points, not targets. The optimal mixture depends on the model
 
 For specialized domain models, mixtures can deviate substantially — domain data may be 60–80% of the SFT mix, with the remainder allocated to general capabilities to prevent regression. Such cases call for evaluation sets that explicitly cover both the target domain and the general capabilities being protected.
 
----
 
 ## 15. DPO Data Quality and the β Parameter
 
@@ -781,7 +765,6 @@ $$r_{\text{shaped}}(x,y) = r_\phi(x,y) - \beta \log \frac{\pi_\theta(y|x)}{\pi_{
 
 The β coefficients in DPO and PPO refer to the same KL constraint, but in DPO it is folded into the loss function structure rather than added as a separate term. In DPO, β is not an external regularizer — it determines the shape of the loss itself. Tuning β in DPO is tuning how much the alignment step is allowed to change the policy.
 
----
 
 ## 16. GRPO and Modern Preference Optimization
 
@@ -813,7 +796,6 @@ DPO is offline: no online sampling, no rollouts, no value model. Training cost i
 
 The "SFT → GRPO" pipeline has become the de facto standard for reasoning-focused models since DeepSeek-R1. For general dialogue quality without strong reasoning emphasis, DPO remains the appropriate choice.
 
----
 
 ## 17. LoRA and QLoRA
 
@@ -933,7 +915,6 @@ Embedding and LM head are not LoRA-adapted by default; full-parameter training o
 
 In practice, covering attention + full MLP outperforms attention-only LoRA, particularly for CPT and larger r.
 
----
 
 ## 18. Mixed Precision Training
 
@@ -978,7 +959,6 @@ H100-class hardware supports fp8 with two formats: E4M3 (more mantissa, less ran
 - Learning rate is largely format-independent for bf16 and fp16; for fp8, slightly larger η can sometimes compensate for noise introduced by quantization.
 - AdamW's ε may need to be raised (e.g., from 1e-8 to 1e-6) under fp8 to avoid division-by-near-zero issues in the per-parameter normalization.
 
----
 
 ## 19. Distributed Training Parameters
 
@@ -1013,7 +993,6 @@ ZeRO-3 has the largest memory savings but the highest communication cost. ZeRO-2
 - **Warmup steps.** Specified in optimizer steps, not forward steps. With more aggressive parallelism, the same number of optimizer steps consumes more data; warmup duration in tokens scales accordingly.
 - **Communication-bound training.** When gradient all-reduce dominates, smaller models with high TP may be inefficient; profile communication versus compute to identify bottlenecks before tuning hyperparameters.
 
----
 
 ## 20. Closing Notes
 
@@ -1026,7 +1005,6 @@ LLM hyperparameter tuning has matured significantly since the early scaling-law 
 
 Hyperparameter tuning is rarely the bottleneck on a well-run training pipeline. Data quality, evaluation rigor, and disciplined ablation usually matter more. This document provides defensible defaults and the reasoning behind them so that tuning effort can be spent where it has the most leverage.
 
----
 
 ## References
 
