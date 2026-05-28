@@ -633,8 +633,11 @@ Adam 的更新公式里有自适应缩放 $\frac{\hat{m}_t}{\sqrt{\hat{v}_t}}$�
 AdamW（Loshchilov & Hutter, 2019）把衰减项从梯度里剥离出来，直接作用在参数上：
 
 $$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$$
+
 $$v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2$$
+
 $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \qquad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
+
 $$\theta_{t+1} = \theta_t - \eta \left(\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon} + \lambda\theta_t\right)$$
 
 其中 $m_t$ 是梯度的指数移动平均（一阶矩，估计梯度**方向**），$v_t$ 是梯度平方的指数移动平均（二阶矩，估计梯度**幅度**），$\hat{m}_t$ 和 $\hat{v}_t$ 是 bias correction 之后的版本。
@@ -896,6 +899,7 @@ Adam 有自适应步长，那 gradient clipping 在 Adam 下还有必要吗？�
 当 $g_t$ 异常大（设为 $M \gg$ 历史梯度）时：
 
 $$m_t = \beta_1 m_{t-1} + (1-\beta_1) M \approx (1-\beta_1) M$$
+
 $$v_t = \beta_2 v_{t-1} + (1-\beta_2) M^2 \approx (1-\beta_2) M^2$$
 
 $m_t$ 和 $\sqrt{v_t}$ 都正比于 $M$，因此当步更新量：
